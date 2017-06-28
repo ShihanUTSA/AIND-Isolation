@@ -43,37 +43,33 @@ def custom_score(game, player):
     my_moves = game.get_legal_moves(player)
     opp_moves = game.get_legal_moves(game.get_opponent(player))
 
-    # --- relative_mobility
-    # own mobility vs opponent's (normalized [-1.0 ... 1.0])
+    """relative_mobility (own mobility vs opponent's (normalized [-1.0 ... 1.0]))"""
     my_mobility = len(my_moves)
     opp_mobility = len(opp_moves)
     relative_mobility = ((my_mobility - opp_mobility) /max(my_mobility, opp_mobility))
 
-    # --- opponent_block_ability
-    # ability to block opponent on next move
+    """opponent_block_ability (ability to block opponent on next move)"""
     opponent_block_ability = 0
     if game.active_player == player:
         opponent_block_ability = (1 if len(set(my_moves) & set(opp_moves)) != 0 
                                   else 0)
     
-    # --- relative_corner_domination
-    # Less number of corner moves relative to the opponent 
-    #is better.
+    """ corner_domination (Less number of corner moves relative to the opponent 
+    is better.)"""
     game_state_factor=1
-    # Being in a corner in late game (less than 25% of board empty) is bad
+    """Being in a corner in late game (less than 25% of board empty) is bad"""
     if len(game.get_blank_spaces()) < 0.25*game.width * game.height:
         game_state_factor = 4
     
-    # Four corners
+    """ Four corners """
     corners = [(0, 0),(0, (game.width - 1)),((game.height - 1), 0),
                ((game.height - 1),(game.width - 1))]
     
-    #own_moves = game.get_legal_moves(player)
     my_in_corner = [move for move in my_moves if move in corners]
     opp_in_corner = [move for move in opp_moves if move in corners]
     corner_domination = game_state_factor * (len(opp_in_corner)-len(my_in_corner))
     				 
-	# score is calculated using weights for the normalized params
+    """ Score is calculated using a weighted method for each parameter."""
     return float(50 * relative_mobility + 40 * opponent_block_ability + 10*corner_domination)
     raise NotImplementedError
     
@@ -110,16 +106,15 @@ def custom_score_2(game, player):
     opp_moves = game.get_legal_moves(game.get_opponent(player))
 
 	
-	# --- relative_mobility
-    # own mobility vs opponent's (normalized [-1.0 ... 1.0])
+    """relative_mobility (own mobility vs opponent's (normalized [-1.0 ... 1.0]))"""
+    
     my_mobility  = len(my_moves)
     opp_mobility = len(opp_moves)
     relative_mobility = ((my_mobility - opp_mobility) /
                          max(my_mobility, opp_mobility))
 
     
-    # --- center_ability
-    # ability to take over the center on next move
+    """ center_ability (ability to take over the center on next move)"""
     board_center = ((game.height - 1)/2,(game.width - 1) / 2)
     c_r, c_c = board_center
 	
@@ -127,15 +122,14 @@ def custom_score_2(game, player):
     if game.active_player == player:
         center_ability = 1 if (c_c, c_r) in my_moves else 0
 
-    # --- opponent_block_ability
-    # ability to block opponent on next move
+    """ opponent_block_ability (ability to block opponent on next move)"""
     opponent_block_ability = 0
     if game.active_player == player:
         opponent_block_ability = (
             1 if len(set(my_moves) & set(opp_moves)) != 0
             else 0)
 
-    # score is calculated using weights for the normalized params
+    """ Score is calculated using a weighted method for each parameter."""
     return float(60 * relative_mobility +
                  10 * my_mobility +
                  20 * center_ability +
@@ -174,11 +168,10 @@ def custom_score_3(game, player):
     my_moves = game.get_legal_moves(player)
     opp_moves = game.get_legal_moves(game.get_opponent(player))
 
-    # --- own_mobility
+    """ my_mobility """
     my_mobility = len(my_moves)
 
-    # --- opponent_block_ability
-    # ability to block opponent on next move
+    """ opponent_block_ability (ability to block opponent on next move)"""
     opponent_block_ability = 0
     if game.active_player == player:
         opponent_block_ability = (
@@ -189,17 +182,14 @@ def custom_score_3(game, player):
     o_r, o_c = game.get_player_location(game.get_opponent(player))
     c_r, c_c = ((game.height - 1) / 2,(game.width - 1) / 2)
 	
-	# --- relative_center_domination
-    # distance to the center relative to the opponent's
-    # (the shorter the distance as compared to the opponent's, the better)
-    #c_r, c_c = board_center
-    #p_r, p_c = my_location
-    #o_r, o_c = opponent_location
+    """ relative_center_domination (distance to the center relative to the opponent's
+    (The shorter the distance as compared to the opponent's is better)
+    """
     player_distance = (((c_c - p_c) + (c_r - p_r))**2 / (c_c + c_r)**2)
     opponent_distance = (((c_c - o_c) + (c_r - o_r))**2 / (c_c + c_r)**2)
     relative_center_domination = opponent_distance - player_distance		
 			
-    # score is calculated using weights for the params
+    """ Score is calculated using a weighted method for each parameter."""
     return float(40 * opponent_block_ability +
                  30 * my_mobility + 30 * relative_center_domination )
     raise NotImplementedError
